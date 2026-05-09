@@ -1,0 +1,33 @@
+#!/bin/sh
+
+set -eu
+
+# Toggle OpenVPN service on OpenWrt.
+# Usage:
+#   ./vpn-toggle <start|stop|status|restart>
+
+ACTION="${1:-}"
+SERVICE="openvpn"
+
+if [ -z "$ACTION" ]; then
+  echo "Usage: $0 <start|stop|status|restart>" >&2
+  exit 2
+fi
+
+case "$ACTION" in
+  start|stop|status|restart)
+    ;;
+  *)
+    echo "Invalid action: $ACTION" >&2
+    echo "Allowed: start|stop|status|restart" >&2
+    exit 2
+    ;;
+esac
+
+if ! command -v service >/dev/null 2>&1; then
+  echo "service command not found" >&2
+  exit 1
+fi
+
+echo "Executing: service ${SERVICE} ${ACTION}"
+service "${SERVICE}" "${ACTION}"

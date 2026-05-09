@@ -1,0 +1,8 @@
+{
+  "uuid": "openwrt-openvpn-ctrl@tearandfix.github.com",
+  "name": "OpenWRT OpenVPN Control",
+  "description": "A Gnome Shell extension to control openvpn client on OpenWRT routers.",
+  "shell-version": ["50"],
+  "version": 1,
+  "settings-schema": "org.gnome.shell.extensions.openwrt-openvpn-ctrl"
+}

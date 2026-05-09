@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist>
+  <schema id="org.gnome.shell.extensions.openwrt-openvpn-ctrl" path="/org/gnome/shell/extensions/openwrt-openvpn-ctrl/">
+    <key name="openwrt-host" type="s">
+      <default>''</default>
+      <summary>OpenWrt SSH host</summary>
+      <description>SSH destination, for example root@192.168.1.1</description>
+    </key>
+    <key name="ssh-private-key-path" type="s">
+      <default>''</default>
+      <summary>SSH private key path</summary>
+      <description>Path to private key used with ssh -i, for example /home/user/.ssh/openwrt_automation</description>
+    </key>
+  </schema>
+</schemalist>
