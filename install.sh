@@ -38,10 +38,10 @@ chmod 644 "${KEY_PATH}.pub"
 
 # Set extension default key path in user settings (only if unset)
 if command -v gsettings >/dev/null 2>&1; then
-  CURRENT_KEY_PATH="$(gsettings get "${SETTINGS_SCHEMA}" "${SETTINGS_KEY}" 2>/dev/null || true)"
+  CURRENT_KEY_PATH="$(GSETTINGS_SCHEMA_DIR="${TARGET_DIR}/schemas" gsettings get "${SETTINGS_SCHEMA}" "${SETTINGS_KEY}" 2>/dev/null || true)"
   CURRENT_KEY_PATH="$(printf "%s" "${CURRENT_KEY_PATH}" | sed "s/^'//;s/'$//")"
   if [[ -z "${CURRENT_KEY_PATH}" ]]; then
-    gsettings set "${SETTINGS_SCHEMA}" "${SETTINGS_KEY}" "${KEY_PATH}" || true
+    GSETTINGS_SCHEMA_DIR="${TARGET_DIR}/schemas" gsettings set "${SETTINGS_SCHEMA}" "${SETTINGS_KEY}" "${KEY_PATH}" || true
   fi
 else
   echo "gsettings not found. Set SSH private key path manually in extension settings."
