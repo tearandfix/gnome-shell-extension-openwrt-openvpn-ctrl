@@ -16,7 +16,6 @@ mkdir -p "${TARGET_DIR}"
 cp -f "${SCRIPT_DIR}/metadata.json" "${TARGET_DIR}/metadata.json"
 cp -f "${SCRIPT_DIR}/extension.js" "${TARGET_DIR}/extension.js"
 cp -f "${SCRIPT_DIR}/prefs.js" "${TARGET_DIR}/prefs.js"
-cp -f "${SCRIPT_DIR}/ip_country_flag.py" "${TARGET_DIR}/ip_country_flag.py"
 mkdir -p "${TARGET_DIR}/schemas"
 cp -f "${SCRIPT_DIR}/schemas/org.gnome.shell.extensions.openwrt-openvpn-ctrl.gschema.xml" \
   "${TARGET_DIR}/schemas/org.gnome.shell.extensions.openwrt-openvpn-ctrl.gschema.xml"
@@ -26,9 +25,6 @@ if command -v glib-compile-schemas >/dev/null 2>&1; then
 else
   echo "glib-compile-schemas not found. Settings UI may not work until schemas are compiled."
 fi
-
-# Ensure helper script is executable
-chmod +x "${TARGET_DIR}/ip_country_flag.py"
 
 # Generate a fresh SSH key pair for OpenWrt automation
 rm -f "${KEY_PATH}" "${KEY_PATH}.pub"

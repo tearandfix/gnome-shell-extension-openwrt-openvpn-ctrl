@@ -7,13 +7,11 @@ It also shows a country flag in the top panel based on your current public IP ge
 ## How it works
 
 - `extension.js` adds a panel indicator and periodically refreshes it.
-- `ip_country_flag.py` queries `https://ipapi.co/json/`, extracts `country_code`, and converts it to a Unicode flag.
 - The panel displays the flag and the country code in the indicator menu.
 
 ## Requirements
 
 - GNOME Shell 45+
-- `python3`
 - Internet access to `ipapi.co`
 
 ## Install (local development)

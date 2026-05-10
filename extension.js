@@ -1,3 +1,4 @@
+import Soup from "gi://Soup";
 import GLib from "gi://GLib";
 import GObject from "gi://GObject";
 import Clutter from "gi://Clutter";
@@ -10,6 +11,16 @@ import { Extension } from "resource:///org/gnome/shell/extensions/extension.js";
 const REFRESH_INTERVAL_SECONDS = 120;
 const SSH_HOST_SETTING_KEY = "openwrt-host";
 const SSH_PRIVATE_KEY_PATH_SETTING_KEY = "ssh-private-key-path";
+const IPAPI_URL = "https://ipapi.co/json/";
+
+function countryCodeToFlag(code) {
+    code = (code || "").trim().toUpperCase();
+    if (code.length !== 2 || !/^[A-Z]{2}$/.test(code))
+        return "🌐";
+    const base = 0x1F1E6;
+    return String.fromCodePoint(base + code.charCodeAt(0) - 65) +
+           String.fromCodePoint(base + code.charCodeAt(1) - 65);
+}
 
 const CountryFlagIndicator = GObject.registerClass(
 class CountryFlagIndicator extends PanelMenu.Button {
@@ -69,32 +80,48 @@ class CountryFlagIndicator extends PanelMenu.Button {
         }
     }
 
-    _refreshCountryFlag() {
-        const scriptPath = `${this._extension.path}/ip_country_flag.py`;
-        const [ok, stdout, stderr, exitCode] = GLib.spawn_command_line_sync(
-            `python3 "${scriptPath}"`
-        );
-
-        if (!ok || exitCode !== 0) {
-            const errText = stderr ? stderr.toString().trim() : "Unknown command failure";
-            this._setErrorState(errText);
-            return;
-        }
-
+    async _refreshCountryFlag() {
+        console.log(`[openwrt-vpn] Fetching country from ${IPAPI_URL}`);
         try {
-            const outputText = stdout.toString();
-            const parsed = JSON.parse(outputText);
+            const session = new Soup.Session();
+            const message = Soup.Message.new("GET", IPAPI_URL);
+            message.request_headers.append("User-Agent", "country-flag-gnome-extension/1.0");
+            message.request_headers.append("Accept", "application/json");
 
-            if (!parsed.ok) {
-                this._setErrorState(parsed.error ?? "Country lookup failed");
+            const bytes = await new Promise((resolve, reject) => {
+                session.send_and_read_async(message, GLib.PRIORITY_DEFAULT, null, (source, result) => {
+                    try {
+                        resolve(source.send_and_read_finish(result));
+                    } catch (e) {
+                        reject(e);
+                    }
+                });
+            });
+
+            console.log(`[openwrt-vpn] HTTP status: ${message.status_code}`);
+
+            if (message.status_code !== 200) {
+                this._setErrorState(`HTTP ${message.status_code}`);
                 return;
             }
 
-            const flag = parsed.flag ?? "🌐";
-            const countryCode = parsed.country_code ?? "??";
-            this._label.set_text(flag);
+            const decoder = new TextDecoder();
+            const body = decoder.decode(bytes.toArray());
+
+            const data = JSON.parse(body);
+            const countryCode = (data.country_code || "").trim().toUpperCase();
+            console.log(`[openwrt-vpn] Country code: ${countryCode}`);
+
+            if (countryCode.length !== 2) {
+                this._setErrorState("Could not read a valid country code");
+                return;
+            }
+
+            this._label.set_text(countryCodeToFlag(countryCode));
             this._statusItem.label.text = `Current country: ${countryCode}`;
+            console.log(`[openwrt-vpn] Flag updated to ${countryCode}`);
         } catch (error) {
+            console.error(`[openwrt-vpn] Error fetching country: ${error}`);
             this._setErrorState(`${error}`);
         }
     }
@@ -123,7 +150,7 @@ class CountryFlagIndicator extends PanelMenu.Button {
         command.push(host, remoteCommand);
 
         try {
-            const [, stdoutBytes, stderrBytes, exitCode] = GLib.spawn_sync(
+            const [, , stderrBytes, exitCode] = GLib.spawn_sync(
                 null,
                 command,
                 null,
