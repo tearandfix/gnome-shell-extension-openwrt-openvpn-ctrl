@@ -57,6 +57,12 @@ class CountryFlagIndicator extends PanelMenu.Button {
         refreshItem.connect("activate", () => this._refreshCountryFlag());
         this.menu.addMenuItem(refreshItem);
 
+        this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
+
+        const settingsItem = new PopupMenu.PopupMenuItem("Settings");
+        settingsItem.connect("activate", () => this._extension.openPreferences());
+        this.menu.addMenuItem(settingsItem);
+
         this._refreshCountryFlag();
         this._startTimer();
     }
